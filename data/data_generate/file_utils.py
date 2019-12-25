@@ -37,7 +37,7 @@ def export_conll(sentence, label, export_file_path, dim=2):
             f.write("\n")
 
 
-def load_conll(data_path):
+def load_conll(data_path, target_column: int = 1, separator: str = ' '):
     """
     Desc:
         load data in conll format 
@@ -52,7 +52,8 @@ def load_conll(data_path):
         for line in f:
             if line != "\n":
                 # line = line.strip()
-                word, tag = line.split(" ")
+                word, *features = line.split('\t')
+                tag = features[target_column - 1]
                 word = word.strip()
                 tag = tag.strip()
                 try:

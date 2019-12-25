@@ -76,7 +76,7 @@ def gen_query_ner(dataset, query_info_dict, query_type="psedo_query"):
 def main(source_data_repo, source_file_name, target_data_repo, target_file_name, dataset_sign=None,
          query_type="psedo_query"):
     file_path = os.path.join(source_data_repo, source_file_name)
-    dataset = load_conll(file_path)
+    dataset = load_conll(file_path, target_column=3)
     # [([word_lst], [label_list]), ([word_lst,], (label_lst))]
     query_info_dict = query_sign_map[dataset_sign]
     # query_info_dict["tags"] = ["ORG", "PER", "LOC"]
@@ -96,14 +96,20 @@ def main(source_data_repo, source_file_name, target_data_repo, target_file_name,
 
 if __name__ == "__main__":
     import os
-    data_repo = "/data/nfsdata/data/yuxian/datasets/genia"
+    data_repo = "/media/yaroslav/DATA/datasets/nlp/ner/ontonotes_v3"
 
     for prefix in ["train", "dev", "test"]:
-        source_file_name = f"{prefix}.ner"
+        source_file_name = f"{prefix}.txt"
         target_file_name = f"query_ner.{prefix}"
 
-        target_data_repo = "/data/data_repo/genia_ner"
+        target_data_repo = "/media/yaroslav/DATA/datasets/nlp/ner/ontonotes_v3_mrc_2"
         os.makedirs(target_data_repo, exist_ok=True)
-        dataset_sign = "genia_ner"
-        main(data_repo, source_file_name, target_data_repo, target_file_name, dataset_sign=dataset_sign,
-             query_type="natural_query")
+        dataset_sign = "en_onto_ner"
+        main(
+            data_repo,
+            source_file_name,
+            target_data_repo,
+            target_file_name,
+            dataset_sign=dataset_sign,
+            query_type="natural_query"
+        )

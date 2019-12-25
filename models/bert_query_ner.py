@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*- 
 
 
-
-# Author: Xiaoy LI 
+# Author: Xiaoy LI
 # Last update: 2019.04.28 
 # First create: 2019.03.23 
 # Description:
@@ -16,15 +15,14 @@
 # ----------------------------------------------------------------------------
 
 
-import os 
-import sys 
-import copy 
-import json 
-import math 
-import logging 
-import numpy as np 
-
-
+import os
+import sys
+import copy
+import json
+import math
+import logging
+import numpy as np
+from pytorch_pretrained_bert import BertConfig, BertModel
 
 root_path = "/".join(os.path.realpath(__file__).split("/")[:-2])
 print("the root_path of current file is: ")
@@ -32,13 +30,11 @@ print(root_path)
 if root_path not in sys.path:
     sys.path.insert(0, root_path)
 
+import torch
+import torch.nn as nn
+from torch.nn import CrossEntropyLoss
 
-import torch 
-import torch.nn as nn 
-from torch.nn import CrossEntropyLoss 
-
-
-from layers.bert_basic_model import BertModel, PreTrainedBertModel, BertConfig  
+# from layers.bert_basic_model import BertModel, PreTrainedBertModel, BertConfig
 from layers.loss_func import entity_span_loss_fct
 
 
@@ -68,34 +64,35 @@ class BertQueryNER(nn.Module):
             for the start and end token positions. 
         if "start_positon" or "end_positions" is None 
     """
+
     def __init__(self, config):
         super(BertQueryNER, self).__init__()
-        bert_config = BertConfig.from_dict(config.bert_config.to_dict()) 
-        self.bert = BertModel(bert_config)
+        bert_config = BertConfig.from_dict(config.bert_config.to_dict())
+        # self.bert = BertModel(bert_config)
 
-        self.start_outputs = nn.Linear(config.hidden_size, 2) 
-        self.end_outputs = nn.Linear(config.hidden_size, 2)         
+        self.start_outputs = nn.Linear(config.hidden_size, 2)
+        self.end_outputs = nn.Linear(config.hidden_size, 2)
 
-        self.hidden_size = config.hidden_size 
-        self.bert = self.bert.from_pretrained(config.bert_model) 
+        self.hidden_size = config.hidden_size
+        # self.bert = self.bert.from_pretrained(config.bert_model)
+        self.bert = BertModel.from_pretrained('bert-base-cased')
 
-    def forward(self, input_ids, token_type_ids=None, attention_mask=None, 
-        start_positions=None, end_positions=None, span_match=None):
+    def forward(self, input_ids, token_type_ids=None, attention_mask=None,
+                start_positions=None, end_positions=None, span_match=None):
 
         sequence_output, _ = self.bert(input_ids, token_type_ids, attention_mask, output_all_encoded_layers=False)
-        sequence_output = sequence_output.view(-1, self.hidden_size)  
-        
-        start_logits = self.start_outputs(sequence_output) 
-        end_logits = self.end_outputs(sequence_output) 
+        sequence_output = sequence_output.view(-1, self.hidden_size)
 
+        start_logits = self.start_outputs(sequence_output)
+        end_logits = self.end_outputs(sequence_output)
 
         if start_positions is not None and end_positions is not None:
-            start_end_loss_fct = CrossEntropyLoss() 
-            start_loss = loss_fct(start_logits.view(-1, 2), start_positions.view(-1))
-            end_loss = loss_fct(end_logits.view(-1, 2), end_positions.view(-1))
+            start_end_loss_fct = CrossEntropyLoss()
+            start_loss = start_end_loss_fct(start_logits.view(-1, 2), start_positions.view(-1))
+            end_loss = start_end_loss_fct(end_logits.view(-1, 2), end_positions.view(-1))
 
             span_loss = entity_span_loss_fct(end_logits.view(-1, 2), start_logits.view(-1, 2), span_match)
             total_loss = start_loss + end_loss + span_loss
-            return total_loss 
+            return total_loss
         else:
-            return start_logits, end_logits 
+            return start_logits, end_logits
