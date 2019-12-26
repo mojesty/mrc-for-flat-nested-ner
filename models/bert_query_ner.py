@@ -75,7 +75,9 @@ class BertQueryNER(nn.Module):
 
         self.hidden_size = config.hidden_size
         # self.bert = self.bert.from_pretrained(config.bert_model)
-        self.bert = BertModel.from_pretrained('bert-base-cased')
+        self.bert: nn.Module = BertModel.from_pretrained('bert-base-cased')
+        # for param in self.bert.parameters():
+        #     param.requires_grad = False
 
     def forward(self, input_ids, token_type_ids=None, attention_mask=None,
                 start_positions=None, end_positions=None, span_match=None):
@@ -91,7 +93,8 @@ class BertQueryNER(nn.Module):
             start_loss = start_end_loss_fct(start_logits.view(-1, 2), start_positions.view(-1))
             end_loss = start_end_loss_fct(end_logits.view(-1, 2), end_positions.view(-1))
 
-            span_loss = entity_span_loss_fct(end_logits.view(-1, 2), start_logits.view(-1, 2), span_match)
+            # span_loss = entity_span_loss_fct(end_logits.view(-1, 2), start_logits.view(-1, 2), span_match)
+            span_loss = 0
             total_loss = start_loss + end_loss + span_loss
             return total_loss
         else:

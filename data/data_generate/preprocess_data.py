@@ -96,13 +96,13 @@ def main(source_data_repo, source_file_name, target_data_repo, target_file_name,
 
 if __name__ == "__main__":
     import os
-    data_repo = "/media/yaroslav/DATA/datasets/nlp/ner/ontonotes_v3"
+    data_repo = "/home/emelyanov-yi/datasets/ontonotes_v3"
 
     for prefix in ["train", "dev", "test"]:
         source_file_name = f"{prefix}.txt"
         target_file_name = f"query_ner.{prefix}"
 
-        target_data_repo = "/media/yaroslav/DATA/datasets/nlp/ner/ontonotes_v3_mrc_2"
+        target_data_repo = "/home/emelyanov-yi/datasets/ontonotes_v3_mrc_2"
         os.makedirs(target_data_repo, exist_ok=True)
         dataset_sign = "en_onto_ner"
         main(
