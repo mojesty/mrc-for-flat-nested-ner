@@ -43,8 +43,6 @@ root_path = "/".join(os.path.realpath(__file__).split("/")[:-3])
 if root_path not in sys.path:
     sys.path.insert(0, root_path)
 
-    
-
 en_onto_ner = {
     "tags": ['LAW', 'EVENT', 'CARDINAL', 'FAC', 'TIME', 'DATE', 'ORDINAL', 'ORG', 'QUANTITY',
              'PERCENT', 'WORK_OF_ART',

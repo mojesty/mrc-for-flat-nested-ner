@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*- 
 
 
-
-# Author: Xiaoy LI 
+# Author: Xiaoy LI
 # Last update: 2019.04.23 
 # First create: 2019.02.03 
 # Description:
@@ -12,10 +11,8 @@
 # (such as: NER)
 
 
-
-import os 
-import sys 
-
+import os
+import sys
 
 root_path = "/".join(os.path.realpath(__file__).split("/")[:-3])
 print("check the root_path :")
@@ -24,21 +21,19 @@ if root_path not in sys.path:
     sys.path.insert(0, root_path)
 
 
-
 def get_bmes(span_labels, length, encoding):
-    tags = ["O" for _ in range(length)] 
-    
+    tags = ["O" for _ in range(length)]
+
     for start, end in span_labels:
-        for i in range(start, end+1):
-            tags[i] = "M" 
+        for i in range(start, end + 1):
+            tags[i] = "M"
         if "E" in encoding:
             tags[end] = "E"
         if "B" in encoding:
-            tags[start] = "B" 
+            tags[start] = "B"
         if "S" in encoding and start == end:
             tags[start] = "S"
-    return tags 
-
+    return tags
 
 
 def get_span_labels(sentence_tags, inv_label_mapping=None):
@@ -56,20 +51,19 @@ def get_span_labels(sentence_tags, inv_label_mapping=None):
 
     span_labels = []
     last = "O"
-    start = -1 
+    start = -1
     for i, tag in enumerate(sentence_tags):
         pos, _ = (None, "O") if tag == "O" else tag.split("-")
         if (pos == "S" or pos == "B" or tag == "O") and last != "O":
             span_labels.append((start, i - 1, last.split("-")[-1]))
         if pos == "B" or pos == "S" or last == "O":
-            start = i 
-        last = tag 
+            start = i
+        last = tag
     if sentence_tags[-1] != "O":
-        span_labels.append((start, len(sentence_tags) - 1, 
-            sentence_tags[-1].split("-")[-1]))
+        span_labels.append((start, len(sentence_tags) - 1,
+                            sentence_tags[-1].split("-")[-1]))
 
-    return span_labels 
-
+    return span_labels
 
 
 def get_tags(span_labels, length, encoding):
@@ -86,13 +80,12 @@ def get_tags(span_labels, length, encoding):
             tags[i] = "M-" + tag
 
         if "E" in encoding:
-            tags[end] = "E-" + tag 
+            tags[end] = "E-" + tag
         if "B" in encoding:
-            tags[start] = "B-" + tag  
+            tags[start] = "B-" + tag
         if "S" in encoding and start == end:
-            tags[start] = "S-" + tag 
-    return tags  
-
+            tags[start] = "S-" + tag
+    return tags
 
 
 def iob_iobes(tags):
@@ -105,7 +98,7 @@ def iob_iobes(tags):
         if tag == "O":
             new_tags.append(tag)
         elif tag.split("-")[0] == "B":
-            if i + 1 != len(tags) and tags[i+1].split("-")[0] == "I":
+            if i + 1 != len(tags) and tags[i + 1].split("-")[0] == "I":
                 new_tags.append(tag)
             else:
                 new_tags.append(tag.replace("B-", "S-"))
@@ -116,7 +109,7 @@ def iob_iobes(tags):
                 new_tags.append(tag.replace("I-", "E-"))
         else:
             raise Exception("invalid IOB format !!")
-    return new_tags 
+    return new_tags
 
 
 if __name__ == "__main__":
@@ -129,7 +122,7 @@ if __name__ == "__main__":
     # -------------------------------------------------------
     # the output former step can used to produce the labeling result 
     # --------------------------------------------------------
-    print("-*-"*10)
+    print("-*-" * 10)
     print("check the content of producing tags : ")
     span_label = get_tags([(1, 3, "ORG"), (8, 10, "PER")], 20, "BIOES")
     print(span_label)
