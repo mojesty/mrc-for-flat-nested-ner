@@ -93,7 +93,7 @@ class BertQueryNER(nn.Module):
             start_loss = start_end_loss_fct(start_logits.view(-1, 2), start_positions.view(-1))
             end_loss = start_end_loss_fct(end_logits.view(-1, 2), end_positions.view(-1))
 
-            # span_loss = entity_span_loss_fct(end_logits.view(-1, 2), start_logits.view(-1, 2), span_match)
+            span_loss = entity_span_loss_fct(end_logits.view(-1, 2), start_logits.view(-1, 2), span_match)
             span_loss = 0
             total_loss = start_loss + end_loss + span_loss
             return total_loss

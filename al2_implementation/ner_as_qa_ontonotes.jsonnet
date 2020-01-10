@@ -27,7 +27,7 @@ local data_prefix = std.extVar('ONTONOTES_PATH');
             "type": "bert-pretrained",
             "pretrained_model": bertname,
             "top_layer_only": false,
-            "requires_grad": true,
+            //"requires_grad": true,
           },
         },
         "embedder_to_indexer_map": {

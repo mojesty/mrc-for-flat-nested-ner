@@ -7,7 +7,7 @@ from allennlp.modules import TextFieldEmbedder, Seq2SeqEncoder
 from allennlp.modules.span_extractors import EndpointSpanExtractor, SpanExtractor
 from allennlp.nn import InitializerApplicator
 from allennlp.nn.util import get_text_field_mask
-from allennlp.training.metrics import CategoricalAccuracy, FBetaMeasure, F1Measure
+from allennlp.training.metrics import CategoricalAccuracy, FBetaMeasure, F1Measure, Metric
 from torch import nn, Tensor
 
 # from components.data.metrics.instance_wise_accuracy import InstanceWiseCategoricalAccuracy
@@ -15,7 +15,7 @@ from torch.nn import CrossEntropyLoss
 
 TensorDict = Dict[str, torch.Tensor]
 
-
+# TODO: support nested entities
 @Model.register("ner_as_mrc")
 class NerAsQaModel(Model):
     def __init__(
@@ -23,14 +23,14 @@ class NerAsQaModel(Model):
         word_embeddings: TextFieldEmbedder,
         encoder: Seq2SeqEncoder,
         vocab: Vocabulary,
-
-        hidden_dim: int = 128,
-        dropout: float = 0.1,
-        f1_average: str = "micro",
-        # Loss-specific params
-        target_namespace: str = "labels",
-        target_label: Optional[str] = None,
-        smooth: bool = False,
+        metrics: Dict[str, Metric],
+        # hidden_dim: int = 128,
+        # dropout: float = 0.1,
+        # f1_average: str = "micro",
+        # # Loss-specific params
+        # target_namespace: str = "labels",
+        # target_label: Optional[str] = None,
+        # smooth: bool = False,
         initializer: InitializerApplicator = InitializerApplicator(),
     ) -> None:
 
@@ -41,7 +41,7 @@ class NerAsQaModel(Model):
         self.span_starts = nn.Linear(hidden_dim, 2)
         self.span_ends = nn.Linear(hidden_dim, 2)
         self._loss_fn = CrossEntropyLoss()
-        self.metrics = {
+        self.metrics = metrics or {
             "start_accuracy": CategoricalAccuracy(),
             "end_accuracy": CategoricalAccuracy(),
             "f1m": F1Measure(positive_label=1),
