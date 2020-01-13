@@ -13,6 +13,8 @@ from torch import nn, Tensor
 # from components.data.metrics.instance_wise_accuracy import InstanceWiseCategoricalAccuracy
 from torch.nn import CrossEntropyLoss
 
+from al2_implementation.ner_as_qa_f1_measure import NerAsQaSpanF1
+
 TensorDict = Dict[str, torch.Tensor]
 
 # TODO: support nested entities
@@ -41,12 +43,14 @@ class NerAsQaModel(Model):
         self.span_starts = nn.Linear(hidden_dim, 2)
         self.span_ends = nn.Linear(hidden_dim, 2)
         self._loss_fn = CrossEntropyLoss()
-        self.metrics = metrics or {
+        metrics = metrics or {}
+        metrics.update({
             "start_accuracy": CategoricalAccuracy(),
             "end_accuracy": CategoricalAccuracy(),
             "f1m": F1Measure(positive_label=1),
-            # "f1-measure": F1Measure(???),
-        }
+            "span_f1": NerAsQaSpanF1()
+        })
+        self.metrics = metrics
         initializer(self)
 
     def forward(
@@ -85,6 +89,7 @@ class NerAsQaModel(Model):
             self.metrics['end_accuracy'](end_logits, answer_starts)
             self.metrics["f1m"](start_logits, answer_starts)
             self.metrics["f1m"](end_logits, answer_ends)
+            self.metrics['span_f1'](start_logits, end_logits, answer_starts, answer_ends, [meta['type'] for meta in kwargs['meta']])
             start_loss = self._loss_fn(start_logits.view(-1, 2), answer_starts.flatten())
             end_loss = self._loss_fn(end_logits.view(-1, 2), answer_ends.flatten())
             loss = start_loss + end_loss

@@ -27,7 +27,7 @@ local data_prefix = std.extVar('ONTONOTES_PATH');
             "type": "bert-pretrained",
             "pretrained_model": bertname,
             "top_layer_only": false,
-            //"requires_grad": true,
+            "requires_grad": false,
           },
         },
         "embedder_to_indexer_map": {
@@ -36,13 +36,17 @@ local data_prefix = std.extVar('ONTONOTES_PATH');
         "allow_unmatched_keys": true
     },
     "encoder": {
-        "type": "pass_through",
-        "input_dim": 768,
+        "type": "lstm",
+        "input_size": 768,
+        "num_layers": 2,
+        "hidden_size": 128,
+        "dropout": 0.3,
+        "bidirectional": true
     },
   },
   "iterator": {
     "type": "bucket",
-    "batch_size": 4,
+    "batch_size": 32,
     "sorting_keys": [["context", "num_tokens"]],
     "biggest_batch_first": true,
   },
